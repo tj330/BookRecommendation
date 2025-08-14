@@ -1,23 +1,24 @@
 package com.tj330.userservice.controller;
 
-import com.tj330.userservice.dto.UserLoginRequest;
-import com.tj330.userservice.dto.UserLoginResponse;
-import com.tj330.userservice.dto.UserRegisterRequest;
-import com.tj330.userservice.dto.UserRegisterResponse;
+import com.tj330.userservice.dto.*;
 import com.tj330.userservice.entity.User;
 import com.tj330.userservice.mapper.UserMapper;
 import com.tj330.userservice.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @Getter
 @Setter
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
     private final UserMapper userMapper;
@@ -44,5 +45,10 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     UserLoginResponse adminLogin(@RequestBody UserLoginRequest request) {
         return authService.authenticate(request);
+    }
+
+    @PostMapping("user/refresh-token")
+    public UserLoginResponse refreshToken(@RequestBody UserRefreshRequest request){
+        return authService.refreshToken(request);
     }
 }

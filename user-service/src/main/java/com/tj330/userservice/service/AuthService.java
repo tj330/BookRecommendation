@@ -1,8 +1,5 @@
 package com.tj330.userservice.service;
-import com.tj330.userservice.dto.UserLoginRequest;
-import com.tj330.userservice.dto.UserLoginResponse;
-import com.tj330.userservice.dto.UserRegisterRequest;
-import com.tj330.userservice.dto.UserRegisterResponse;
+import com.tj330.userservice.dto.*;
 import com.tj330.userservice.entity.User;
 import com.tj330.userservice.exception.EmailAlreadyTakenException;
 import com.tj330.userservice.mapper.UserMapper;
@@ -64,12 +61,36 @@ public class AuthService  {
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid username or password"));
 
         String token = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return new UserLoginResponse(
                 token,
                 "Bearer",
+                refreshToken,
                 user.getUsername(),
                 user.getRole()
         );
+    }
+
+    public UserLoginResponse refreshToken(@RequestBody UserRefreshRequest request) {
+        String refreshToken = request.refreshToken();
+        String username = jwtService.extractUsername(refreshToken);
+
+        var user = this.userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid refresh token"));
+
+        if (jwtService.isTokenValid(refreshToken, user)) {
+            var accessToken = jwtService.generateToken(user);
+
+            return new UserLoginResponse(
+                    accessToken,
+                    "Bearer",
+                    refreshToken,
+                    username,
+                    user.getRole()
+            );
+        }
+
+        throw new RuntimeException("Invalid refresh token");
     }
 }
