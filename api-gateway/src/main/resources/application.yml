@@ -10,6 +10,12 @@ spring:
                 - Path=/api/auth/**
               filters:
                 - AuthenticationFilter
+            - id: book-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/books/**
+              filters:
+                - AuthenticationFilter
 
   application:
     name: api-gateway
